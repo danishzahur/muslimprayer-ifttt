@@ -1,0 +1,31 @@
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]
+
+# caching
+<FilesMatch "\.(webm|ogg|mp4|mkv|ts|mp3|m3u|m3u8)$">
+    <IfModule mod_expires.c>
+        ExpiresActive on
+        ExpiresDefault "access plus 30 days"
+    </IfModule>
+    <IfModule mod_headers.c>
+        Header set Expires "Mon, 27 Mar 2038 13:33:37 GMT"
+        Header set Cache-Control "max-age=2592000, public"
+        Header append Vary: Accept-Encoding
+        Header set Access-Control-Allow-Origin "*"
+    </IfModule>
+</FilesMatch>
+
+
+# ----------------------------------------------------------------------
+# ApplicationContext start
+# ----------------------------------------------------------------------
+
+# DEV
+RewriteCond %{HTTP_HOST} ^\.zoat$
+RewriteRule .? - [E=APPLICATION_CONTEXT:Development]
+
+# PROD
+RewriteCond %{HTTP_HOST} ^\.com$ [OR]
+RewriteCond %{HTTP_HOST} ^\.eu$ 
+RewriteRule .? - [E=APPLICATION_CONTEXT:Production]

@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Use Bing Maps REST Services with jQuery to build an autocomplete box and find a location dynamically</title>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-1.5.1.js" type="text/javascript"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.10/jquery-ui.js" type="text/javascript"></script>
+    <link href="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.10/themes/redmond/jquery-ui.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+   
+        .ui-autocomplete-loading
+        {
+            background: white url('https://www.guiza.net/fotos/wp-content/plugins/nextgen-gallery/admin/css/images/ui-anim_basic_16x16.gif') right center no-repeat;
+        }
+        #location
+        {
+            width: 25em;
+        }
+    </style>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#location").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "https://dev.virtualearth.net/REST/v1/Locations",
+                        dataType: "jsonp",
+                        data: {
+                            key: "Ahqs89qsCkdI9yofpWDi3z3xV12walQ84-Em4FkwgTMUAcJFp0icElIvSdE7KOr3",
+                            q: request.term
+                        },
+                        jsonp: "jsonp",
+                        success: function (data) {
+                            var result = data.resourceSets[0];
+                            if (result) {
+                                if (result.estimatedTotal > 0) {
+                                    response($.map(result.resources, function (item) {
+                                        return {
+                                            data: item,
+                                            label: item.name + ' (' + item.address.countryRegion + ')',
+                                            value: item.name
+                                        }
+                                    }));
+                                }
+                            }
+                        }
+                    });
+                },
+                minLength: 1,
+                change: function (event, ui) {
+                    if (!ui.item)
+                        $("#location").val('');
+                },
+                select: function (event, ui) {
+                    displaySelectedItem(ui.item.data);
+                }
+            });
+        });
+
+        function displaySelectedItem(item) {
+            $("#searchResult").empty().append('Result: ' + item.name).append(' (Latitude: ' + item.point.coordinates[0] + ' Longitude: ' + item.point.coordinates[1] + ')');
+            $("#latitude").val(item.point.coordinates[0].toFixed(4));
+            $("#longitude").val(item.point.coordinates[1].toFixed(4));
+            $('#location').removeClass('ui-autocomplete-loading');
+        }
+    </script>
+</head>
+<body>
+    <div>
+        <form method="post">
+        <div class="ui-widget">
+            <label for="location">
+                City:
+            </label>
+            <input id="location" name="location" value="#location#" />
+            <input id="latitude" name="latitude" value="#latitude#" type="hidden" />
+            <input id="longitude" name="longitude" value="#longitude#" type="hidden" />
+        </div>
+        <div id="searchResult" class="ui-widget" style="margin-top: 1em;">
+        </div>
+            <input type="submit" value="Save" />
+        
+        </form>
+    </div>
+</body>
+</html>

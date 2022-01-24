@@ -1,0 +1,7 @@
+{
+  "require" : {
+    "geniusts/prayer-times": "^1.0"
+  },
+  "require-dev": {
+  }
+}
